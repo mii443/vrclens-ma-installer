@@ -1,0 +1,21 @@
+{
+  "name": "dev.mii.vrclens-ma-installer",
+  "displayName": "VRCLens MA Installer",
+  "version": "0.1.2",
+  "author": {
+    "name": "mii",
+    "email": "mii@mii.dev",
+    "url": "https://github.com/mii443"
+  },
+  "license": "MIT",
+  "url": "https://github.com/mii443/vrclens-ma-installer/releases/download/v0.1.2/dev.mii.vrclens-ma-installer-0.1.2.zip",
+  "documentationUrl": "https://github.com/mii443/vrclens-ma-installer/blob/main/README.md",
+  "changelogUrl": "https://github.com/mii443/vrclens-ma-installer/blob/main/CHANGELOG.md",
+  "unity": "2022.3",
+  "description": "Non-destructive VRCLens installation using the user's separately installed VRCLens and NDMF.",
+  "vpmDependencies": {
+    "nadena.dev.ndmf": ">=1.14.8 <2.0.0-a",
+    "nadena.dev.modular-avatar": ">=1.18.7 <2.0.0-a",
+    "com.vrchat.avatars": ">=3.7.0 <4.0.0-a"
+  }
+}

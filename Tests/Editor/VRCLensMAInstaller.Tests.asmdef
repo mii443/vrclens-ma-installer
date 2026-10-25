@@ -1,0 +1,6 @@
+{
+  "name": "VRCLensMAInstaller.Tests",
+  "references": ["VRCLensMAInstaller.Runtime", "VRCLensMAInstaller.Editor", "nadena.dev.ndmf", "nadena.dev.ndmf.runtime", "VRC.SDK3A", "VRC.SDKBase", "VRC.SDKBase.Editor", "VRC.SDKBase.Editor.BuildPipeline", "nadena.dev.modular-avatar.core", "Lyra.MenuManager"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": false
+}

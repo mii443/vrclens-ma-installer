@@ -1,0 +1,43 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Build allowlisted VPM package
+        env:
+          RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+        run: python3 Tools/build_release.py --tag "$RELEASE_TAG"
+      - name: Publish immutable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(python3 -c 'import json; print(json.load(open("package.json"))["version"])')
+          tag="v$version"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists; increment package.json instead of replacing it."
+            exit 1
+          fi
+          gh release create "$tag" \
+            "dist/dev.mii.vrclens-ma-installer-$version.zip" \
+            "dist/dev.mii.vrclens-ma-installer-$version.zip.sha256" \
+            dist/package.json \
+            --target "$GITHUB_SHA" \
+            --title "VRCLens MA Installer $version" \
+            --notes-file CHANGELOG.md

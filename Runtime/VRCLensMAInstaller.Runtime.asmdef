@@ -1,0 +1,5 @@
+{
+  "name": "VRCLensMAInstaller.Runtime",
+  "references": ["VRC.SDKBase"],
+  "autoReferenced": true
+}

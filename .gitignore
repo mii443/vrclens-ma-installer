@@ -1,0 +1,25 @@
+# Track only this package, never its containing Unity project or paid assets.
+/*
+!/.gitignore
+!/.gitattributes
+!/.github/
+!/package.json
+!/package.json.meta
+!/README.md
+!/README.md.meta
+!/LICENSE.md
+!/LICENSE.md.meta
+!/CHANGELOG.md
+!/CHANGELOG.md.meta
+!/Runtime/
+!/Runtime.meta
+!/Editor/
+!/Editor.meta
+!/Prefabs/
+!/Prefabs.meta
+!/Tests/
+!/Tests.meta
+!/Tools/
+!/Tools.meta
+**/__pycache__/
+*.pyc

@@ -1,0 +1,6 @@
+{
+  "name": "VRCLensMAInstaller.Editor",
+  "references": ["VRCLensMAInstaller.Runtime", "nadena.dev.ndmf", "nadena.dev.ndmf.runtime", "VRC.SDKBase", "VRC.SDK3A", "VRC.SDKBase.Editor", "VRC.SDKBase.Editor.BuildPipeline"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

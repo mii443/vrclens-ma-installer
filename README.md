@@ -70,7 +70,7 @@ Proxyはビルド時に生成されるVRCLensメニュー全体を表します�
 
 カスタマイズのVRCFuryメニューには`VRCLens/Custom`等の追加先が設定されています。LyraはNDMFのTransformingで移動処理を行い、その後のSDKコールバックでVRCFuryがメニューを統合するため、固定パスのままでは本体とCustomが分離します。本ツールは、Lyra処理前後で追加先のメニュー項目を追跡し、ビルド用コピーの追加先パスだけを更新します。例えば`Cameras/My Lens/Custom`へ追従します。元のカスタマイズPrefabとLyraレイアウトは変更しません。
 
-追従の対象は、本Installerで導入したVRCLens配下のVRCFury FullControllerメニューです。追加先をLyraのインベントリへ移して非表示にするなど、移動先が消えたり一意に決まらなくなった場合はビルドを停止します。
+追従の対象は、本Installerで導入したVRCLens配下のVRCFury FullControllerメニューとToggleのメニューパスです。Toggleで作られるスイッチ・スライダーもVRCLensと一緒に移動します。追加先をLyraのインベントリへ移して非表示にするなど、移動先が消えたり一意に決まらなくなった場合はビルドを停止します。
 
 ## 非破壊性とビルド順序
 
@@ -123,10 +123,12 @@ python Tools/build_release.py
 
 テストは配布ZIPには含みません。プロジェクトが既にUnityで開かれている場合、`Library/VRCLensMAInstaller.test-request.txt`にテスト対象Prefabのプロジェクト相対パスを書くと、別の一時シーンで実行し、`Logs/vrclens-ma-live-results.txt`へ結果を出します。
 
-リクエストファイルの2行目に`compat`を書くとVariant・Lyra併用テスト、`lyra`を書くとLyra併用テストだけを実行します。SDKテストはローカルのアップロード前処理を実行し、サーバーへのアップロードは行いません。カスタマイズ側の一時出力先もテスト専用フォルダーへ一時的に切り替え、完了後に復元します。
+リクエストファイルの2行目に`compat`を書くとVariant・Lyra併用テスト、`lyra`を書くとLyra併用テストだけを実行します。バッチモードでは`-vrclensTestMode compat`または`-vrclensTestMode lyra`で同じテストを選択できます。SDKテストはローカルのアップロード前処理を実行し、サーバーへのアップロードは行いません。カスタマイズ側の一時出力先もテスト専用フォルダーへ一時的に切り替え、完了後に復元します。
 
 0.1.1の互換テスト（2026-10-25）では、Unity 2022.3.22f1、VRCLens 1.10.0、MA 1.18.7、NDMF 1.14.8、Lyra 1.2.1、VRCFury 1.1434.0、SDK 3.10.5で1,916チェックが成功しました。InstallerとアバターのVariantを保存・再読込してNDMF処理を行い、4つの位置と設定・追加オブジェクトの保持を確認しています。
 
 SDK前処理ではMenuExtra、MoveDroneVertical、MenuFavorites、SmoothZoomを併用し、Lyraによる`Cameras/My Lens`への移動・改名、Customメニューの追従、ルートへの重複生成がないことを確認しました。元Assetsの1,888ファイルとLyraレイアウトのハッシュは不変でした。全カスタマイズ個別の機能やVRChat内での撮影動作までを検証したものではありません。
 
 参考: [NDMF BuildPhase](https://ndmf.nadena.dev/api/nadena.dev.ndmf.BuildPhase.html)、[NDMF](https://ndmf.nadena.dev/)。
+
+0.1.3のLyra回帰テスト（2026-10-26）では上記4種類にFarClipPlaneを追加し、FullControllerとToggleの両方が`Cameras/My Lens/Custom`配下へ追従することをSDK前処理で確認しました。1,906チェックが成功し、元Assetsの1,888ファイルとLyraレイアウトは不変でした。

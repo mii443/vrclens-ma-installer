@@ -11,8 +11,8 @@ using VRC.SDK3.Avatars.ScriptableObjects;
 
 namespace Micro.VRCLensMA.Editor
 {
-    // VRCFury merges FullController menus after NDMF's Transforming phase. Keep the
-    // merge destinations attached to the same menus when Lyra moves or renames them.
+    // VRCFury merges FullController menus and creates Toggle controls after NDMF's
+    // Transforming phase. Keep both attached to the menus Lyra moves or renames.
     // Only serialized configuration on our build copy is changed; no vendor code is bundled.
     internal static class CustomizationMenuRouting
     {
@@ -51,23 +51,35 @@ namespace Micro.VRCLensMA.Editor
                     var iterator = serialized.GetIterator();
                     while (iterator.Next(true))
                     {
-                        if (iterator.propertyType != SerializedPropertyType.ManagedReference ||
-                            !iterator.managedReferenceFullTypename.EndsWith(" VF.Model.Feature.FullController", StringComparison.Ordinal)) continue;
+                        if (iterator.propertyType != SerializedPropertyType.ManagedReference) continue;
+                        if (iterator.managedReferenceFullTypename.EndsWith(" VF.Model.Feature.Toggle", StringComparison.Ordinal))
+                        {
+                            // Toggle.name contains a menu path, not just the visible label. Its
+                            // final segment is a control, so only resolve the parent submenu path.
+                            CapturePath(state, menu, component, iterator.FindPropertyRelative("name"), true);
+                            continue;
+                        }
+                        if (!iterator.managedReferenceFullTypename.EndsWith(" VF.Model.Feature.FullController", StringComparison.Ordinal)) continue;
                         var menus = iterator.FindPropertyRelative("menus");
                         if (menus == null || !menus.isArray) continue;
                         for (var i = 0; i < menus.arraySize; i++)
                         {
-                            var prefix = menus.GetArrayElementAtIndex(i).FindPropertyRelative("prefix");
-                            if (prefix == null || string.IsNullOrWhiteSpace(prefix.stringValue)) continue;
-                            var parts = SplitPath(prefix.stringValue);
-                            Resolve(menu, parts, out var matched, out var anchor);
-                            if (matched == 0) continue; // Explicit paths outside the installed menu keep their meaning.
-                            state.Routes.Add(new Route { Component = component, PropertyPath = prefix.propertyPath,
-                                OriginalPrefix = prefix.stringValue, Anchor = anchor, Suffix = parts.Skip(matched).ToArray() });
+                            CapturePath(state, menu, component, menus.GetArrayElementAtIndex(i).FindPropertyRelative("prefix"), false);
                         }
                     }
                 }
             }
+        }
+
+        private static void CapturePath(State state, VRCExpressionsMenu menu, Component component, SerializedProperty path, bool hasControlName)
+        {
+            if (path == null || string.IsNullOrWhiteSpace(path.stringValue)) return;
+            var parts = SplitPath(path.stringValue);
+            var parentParts = hasControlName ? parts.Take(parts.Length - 1).ToArray() : parts;
+            Resolve(menu, parentParts, out var matched, out var anchor);
+            if (matched == 0) return; // Explicit paths outside the installed menu keep their meaning.
+            state.Routes.Add(new Route { Component = component, PropertyPath = path.propertyPath,
+                OriginalPrefix = path.stringValue, Anchor = anchor, Suffix = parts.Skip(matched).ToArray() });
         }
 
         internal static void Retarget(BuildContext context)

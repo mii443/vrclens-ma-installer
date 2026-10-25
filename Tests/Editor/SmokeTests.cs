@@ -45,7 +45,7 @@ namespace Micro.VRCLensMA.Tests
             checks = 0;
             File.WriteAllText(ResultPath, "Running\n");
             var previousScene = SceneManager.GetActiveScene();
-            var testScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            var testScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, Application.isBatchMode ? NewSceneMode.Single : NewSceneMode.Additive);
             SceneManager.SetActiveScene(testScene);
             var selection = Selection.objects;
             try
@@ -55,6 +55,13 @@ namespace Micro.VRCLensMA.Tests
                 string fixture;
                 var compatibilityOnly = false;
                 var lyraOnly = false;
+                var modeIndex = Array.IndexOf(args, "-vrclensTestMode");
+                if (modeIndex >= 0 && modeIndex + 1 < args.Length)
+                {
+                    var mode = args[modeIndex + 1];
+                    compatibilityOnly = mode == "compat" || mode == "lyra";
+                    lyraOnly = mode == "lyra";
+                }
                 if (!Application.isBatchMode && File.Exists(RequestPath))
                 {
                     var request = File.ReadAllLines(RequestPath);
@@ -102,8 +109,11 @@ namespace Micro.VRCLensMA.Tests
             }
             finally
             {
-                SceneManager.SetActiveScene(previousScene);
-                EditorSceneManager.CloseScene(testScene, true);
+                if (!Application.isBatchMode)
+                {
+                    SceneManager.SetActiveScene(previousScene);
+                    EditorSceneManager.CloseScene(testScene, true);
+                }
                 Selection.objects = selection;
             }
         }

@@ -88,7 +88,7 @@ namespace Micro.VRCLensMA.Tests
             var source = Create(prefab);
             SkipWriteDefaultsPromptOnFixture(source);
             var installer = source.GetComponentInChildren<VRCLensInstaller>();
-            foreach (var path in new[] { "Assets/VRCLens_Custom/[Utility] MenuExtra.prefab", "Assets/VRCLens_Custom/[Drone] MoveDroneVertical.prefab", "Assets/VRCLens_Custom/[Utility] MenuFavorites.prefab", "Assets/VRCLens_Custom/[Camera] SmoothZoom.prefab" })
+            foreach (var path in new[] { "Assets/VRCLens_Custom/[Utility] MenuExtra.prefab", "Assets/VRCLens_Custom/[Drone] MoveDroneVertical.prefab", "Assets/VRCLens_Custom/[Utility] MenuFavorites.prefab", "Assets/VRCLens_Custom/[Camera] SmoothZoom.prefab", "Assets/VRCLens_Custom/[Camera] FarClipPlane.prefab" })
             {
                 var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 Check(asset != null, "custom menu fixture exists: " + Path.GetFileName(path));
@@ -131,11 +131,19 @@ namespace Micro.VRCLensMA.Tests
                 Check(lens != null, "Lyra moves and renames VRCLens via Item Proxy");
                 Check(lens.controls.Any(c => c.name.Trim() == "Custom"), "custom menus stay under moved VRCLens");
                 Check(lens.controls.First(c => c.name.Trim() == "Custom").subMenu.controls.Any(c => c.name == "Move Drone Vertical"), "MoveDroneVertical is inside moved VRCLens/Custom");
+                Check(HasParameter(lens, "VRCL_Custom/FarClipPlane", new HashSet<VRCExpressionsMenu>()), "VRCFury Toggle control follows moved VRCLens alongside FullController menus");
                 Check(!menu.controls.Any(c => c.name.Trim() == "VRCLens" || c.name.Trim() == "Custom"), "no stray VRCLens or Custom menu at avatar root");
                 Check(layoutHash == Hash(Temp + "/LyraLayout.asset"), "Lyra layout asset unchanged");
                 Check(source.GetComponent<VRCAvatarDescriptor>().expressionsMenu == sourceMenu && source.transform.Find("VRCLens") == null, "Lyra build preserves source avatar");
             }
             finally { Object.DestroyImmediate(clone); Object.DestroyImmediate(source); }
+        }
+
+        private static bool HasParameter(VRCExpressionsMenu menu, string parameter, HashSet<VRCExpressionsMenu> visited)
+        {
+            if (menu == null || !visited.Add(menu)) return false;
+            return menu.controls.Any(c => c.parameter?.name == parameter || (c.subParameters != null && c.subParameters.Any(p => p?.name == parameter))
+                || HasParameter(c.subMenu, parameter, visited));
         }
 
         private static void DumpMenu(VRCExpressionsMenu menu, string parent, HashSet<VRCExpressionsMenu> visited)
